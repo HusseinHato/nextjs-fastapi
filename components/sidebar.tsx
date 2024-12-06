@@ -1,6 +1,7 @@
 import { BarChart2, LogOut, Settings } from 'lucide-react'
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import Image from 'next/image'
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -10,26 +11,9 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="space-y-4 py-4">
         <div className="px-4 py-2">
           <div className="flex flex-col items-start space-y-2">
-            <h2 className="text-xl font-bold tracking-tight">CORE.TODAY</h2>
+            <Image src="/coretoday.png" alt="logo" width={150} height={150} />
             <p className="text-lg">X</p>
-            {/* Blue elephant icon */}
-            <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-6 h-6 text-white"
-              >
-                <path d="M19 8.71V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2.71a2 2 0 0 0 0 2.58V16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4.71a2 2 0 0 0 0-2.58Z" />
-                <path d="M12 8v8" />
-                <path d="M8 9v6" />
-                <path d="M16 9v6" />
-              </svg>
-            </div>
+            <Image src="/kokkiri.png" alt="logo" width={150} height={150} />
           </div>
         </div>
         <div className="px-3 py-2">
