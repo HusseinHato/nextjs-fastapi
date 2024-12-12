@@ -20,6 +20,7 @@ load_dotenv(dotenv_path)
 SECRET_KEY = os.getenv("SECRET_KEY") # Replace with a strong secret key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7 
 
 # MongoDB setup
 client = motor.motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
@@ -66,6 +67,17 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def create_tokens(username: str):
+    # Access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": username}, expires_delta=access_token_expires)
+
+    # Refresh token
+    refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    refresh_token = create_access_token(data={"sub": username}, expires_delta=refresh_token_expires)
+
+    return access_token, refresh_token
 
 async def get_user(username: str):
     user = await user_collection.find_one({"username": username})
@@ -130,21 +142,74 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+    access_token, refresh_token = create_tokens(user.username)
+
+    # Set tokens as HTTP-only cookies
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        secure=False,
+        samesite="Lax",
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=f"Bearer {refresh_token}",
+        httponly=True,
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        secure=False,
+        samesite="Lax",
     )
 
-    # Set token as HTTP-only cookie
-    response.set_cookie(
-        key="access_token", 
-        value=f"Bearer {access_token}", 
-        httponly=True, 
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        secure=False,  # Set to True in production to enforce HTTPS
-        samesite="Lax"
-    )
     return {"msg": "Successfully logged in"}
+
+@app.post("/api/py/refresh")
+async def refresh_token(request: Request, response: Response):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        # Decode and verify the refresh token
+        payload = jwt.decode(refresh_token[7:], SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
+        # Generate new tokens
+        access_token, new_refresh_token = create_tokens(username)
+
+        # Update cookies with the new tokens
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {access_token}",
+            httponly=True,
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            secure=False,
+            samesite="Lax",
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=f"Bearer {new_refresh_token}",
+            httponly=True,
+            max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+            secure=False,
+            samesite="Lax",
+        )
+
+        return {"msg": "Access token refreshed"}
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
 
 @app.get("/api/py/users/me", response_model=User)
 async def read_users_me(request: Request):

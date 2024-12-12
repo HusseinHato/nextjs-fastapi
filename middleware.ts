@@ -29,16 +29,20 @@ export async function middleware(request: NextRequest) {
     
     try {
         
-    const secretKey = new TextEncoder().encode(SECRET_KEY);
+        const secretKey = new TextEncoder().encode(SECRET_KEY);
 
-        const tokenValue = token.value.replace('Bearer ', '');
+        const tokenValue = token.value.slice(7, token.value.length).replace(/"/g, "").trim();
 
+        console.log("Token Value :", tokenValue);
+
+        const { payload, protectedHeader } = await jwtVerify(tokenValue, secretKey);
 
       // Verify the token using jose
       
-      const { payload } = await jwtVerify(tokenValue, secretKey);
+      // const { payload, protectedHeader } = await jwtVerify(tokenValue, secretKey);
   
-      console.log(payload);
+       console.log(payload);
+       console.log(protectedHeader);
   
       // Proceed to the requested route if the token is valid
       return NextResponse.next();
