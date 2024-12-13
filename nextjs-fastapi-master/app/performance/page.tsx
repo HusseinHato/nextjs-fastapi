@@ -10,7 +10,7 @@ export default function PerformanceModelPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-black">Performance Model</h1>
         <Button variant="ghost" size="icon" asChild className="text-blue-600 hover:text-blue-800">
-          <Link href="/admin-profile">
+          <Link href="performance/admin-profile">
             <UserCircle className="h-6 w-6" />
             <span className="sr-only">Admin Profile</span>
           </Link>
@@ -31,7 +31,7 @@ export default function PerformanceModelPage() {
           </div>
         </div>
         <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Link href="/input-performance-model">Input Data</Link>
+          <Link href="performance/input-performance-model">Input Data</Link>
         </Button>
       </div>
 

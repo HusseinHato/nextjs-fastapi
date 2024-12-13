@@ -44,7 +44,7 @@ export default function InputPerformanceModelPage() {
 
   return (
     <div className="container mx-auto p-4 bg-white">
-      <Button variant="ghost" onClick={() => router.push('/')} className="mb-4 text-blue-600 hover:text-blue-800">
+      <Button variant="ghost" onClick={() => router.push('/performance')} className="mb-4 text-blue-600 hover:text-blue-800">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Performance Models
       </Button>
