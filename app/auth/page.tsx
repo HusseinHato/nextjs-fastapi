@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -32,6 +32,7 @@ interface LoginBody {
 
 interface Response {
   msg: string;
+  detail: string;
 }
 
 const loginSchema = z.object({
@@ -77,8 +78,8 @@ export default function AdminAuth() {
     // Simulate API call
     const response = await postFetcherFormdata<LoginBody, Response>("http://localhost:8000/api/py/token", values)
 
-    if (response.msg !== "Login successful!") {
-      toast.error(response.msg)
+    if (response.msg !== "Successfully logged in") {
+      toast.error(response.detail)
       setIsLoading(false)
       return
     }
@@ -86,7 +87,6 @@ export default function AdminAuth() {
     toast("Login successful!")
     setIsLoading(false)
 
-    // Here you would typically make an API call to authenticate the user
     router.push("/dashboard")
   }
 
@@ -106,7 +106,7 @@ export default function AdminAuth() {
     });
     
     if (response.msg !== "User registered successfully") {
-      toast.error(response.msg)
+      toast.error(response.detail)
       setIsLoading(false)
       return
     }
@@ -115,6 +115,31 @@ export default function AdminAuth() {
     setIsLoading(false)
     // Here you would typically make an API call to register the user
   }
+
+  /* useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("/api/py/users/me", { method: "GET", credentials: "include" });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const data = await response.json();
+
+        if (data) {
+          router.push("/dashboard")
+        }
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUser();
+
+  }, [router]);
+  */
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#006AB5]">

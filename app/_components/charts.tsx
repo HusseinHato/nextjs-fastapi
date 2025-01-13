@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { use, useEffect, useState } from "react"
 import {
   Bar,
   BarChart,
@@ -13,28 +14,29 @@ import {
   Tooltip,
 } from "recharts"
 
-const contributorsData = [
-  { name: "Hasbi", value: 62 },
-  { name: "Aya", value: 50 },
-  { name: "Ame", value: 58 },
-  { name: "Zahra", value: 88 },
-  { name: "Ahsan", value: 75 },
-  { name: "Rafi", value: 63 },
-  { name: "Aqil", value: 110 },
-  { name: "Mieko", value: 75 },
-  { name: "Gilang", value: 82 },
-  { name: "Putra", value: 40 },
-  { name: "Hussein", value: 15 },
-]
-
-const categoriesData = [
-  { name: "Animal", value: 60, color: "#2563eb" },
-  { name: "Robot", value: 40, color: "#60a5fa" },
-  { name: "Vehicle", value: 50, color: "#93c5fd" },
-  { name: "Misc", value: 10, color: "#dbeafe" },
-]
+interface CategoriesData {
+  name: string
+  value: number
+  color: string
+}
 
 export function Charts() {
+
+  const [contributorsData, setContributorsData] = useState([])
+  const [categoriesData, setCategoriesData] = useState<CategoriesData[]>([])
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/py/users-chart")
+      .then((response) => response.json()) // Parse the response as JSON
+      .then((data) => setContributorsData(data))
+      .catch((error) => console.error("Error fetching contributors data:", error));
+      
+    fetch("http://localhost:8000/api/py/toys-by-category")
+    .then((response) => response.json())
+    .then((data) => setCategoriesData(data)) 
+    .catch((error) => console.error("Error fetching categories data:", error)); // Handle any errors
+  }, []);
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card className="col-span-2">
@@ -46,13 +48,13 @@ export function Charts() {
             <BarChart data={contributorsData}>
               <XAxis
                 dataKey="name"
-                stroke="#888888"
-                fontSize={12}
+                stroke="#000"
+                fontSize={10}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="#888888"
+                stroke="#000000"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
@@ -60,9 +62,8 @@ export function Charts() {
               />
               <Bar
                 dataKey="value"
-                fill="currentColor"
+                fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
-                className="fill-primary"
               />
               <Tooltip />
             </BarChart>

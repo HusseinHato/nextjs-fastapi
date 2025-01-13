@@ -10,12 +10,6 @@ export const postFetcher = async <T, R> (url: string, bodyData: T): Promise<R> =
       body: JSON.stringify(bodyData),
     });
   
-    if (!response.ok) {
-      console.log(response);
-      const error = new Error('An error occurred while fetching the data.');
-      throw error;
-    }
-  
     return response.json() as Promise<R>;
   };
 
@@ -35,12 +29,7 @@ export const postFetcher = async <T, R> (url: string, bodyData: T): Promise<R> =
       credentials: 'include',
       body: formData,
     });
-  
-    if (!response.ok) {
-      console.log(response);
-      throw new Error('An error occurred while fetching the data.');
-    }
-  
+
     return response.json() as Promise<R>;
   };
   

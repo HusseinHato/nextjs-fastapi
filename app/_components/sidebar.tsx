@@ -1,11 +1,37 @@
-import { BarChart2, LogOut, Settings } from 'lucide-react'
+"use client"
+
+import { BarChart2, LogOut, Settings, User } from 'lucide-react'
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/py/logout', {
+        method: 'POST',
+        credentials: 'include', // Ensures cookies are sent with the request
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Redirect the user to the login page after successful logout
+        router.push('/auth');
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <div className={cn("pb-12 min-h-screen bg-[#F5F9FF]", className)}>
       <div className="space-y-4 py-4">
@@ -19,30 +45,37 @@ export function Sidebar({ className }: SidebarProps) {
         <div className="px-3 py-2">
           <div className="space-y-1">
             <Link
-              href="#"
+              href="/dashboard"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
             >
               <BarChart2 className="h-4 w-4" />
               Overview
             </Link>
             <Link
-              href="#"
+              href="/dashboard/performance"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
             >
               <Settings className="h-4 w-4" />
-              Setting
+              Performance Model
+            </Link>
+            <Link
+              href="/dashboard/contributor"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+            >
+              <User className="h-4 w-4" />
+              Contributor
             </Link>
           </div>
         </div>
       </div>
       <div className="mt-auto px-3 py-2">
-        <Link
-          href="#"
+        <button
+          onClick={handleLogout}
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
         >
           <LogOut className="h-4 w-4" />
           Log out
-        </Link>
+        </button>
       </div>
     </div>
   )
